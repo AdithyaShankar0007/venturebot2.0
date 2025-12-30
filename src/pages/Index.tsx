@@ -240,8 +240,8 @@ const Index = () => {
                   </p>
                 </div>
                 
-                <div className="w-full max-w-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                  <p className="text-sm text-muted-foreground mb-3 text-center">Try these prompts:</p>
+                <div className="w-full max-w-2xl animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                  <p className="text-sm text-muted-foreground mb-3 text-center">Ask about:</p>
                   <SuggestedPrompts onSelect={handleSend} />
                 </div>
 
