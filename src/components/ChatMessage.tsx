@@ -2,6 +2,20 @@ import { cn } from "@/lib/utils";
 import { Message } from "@/lib/chat";
 import { Lightbulb, Sparkles } from "lucide-react";
 
+// Helper to render inline bold/italic formatting
+function renderInlineFormatting(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="text-primary font-semibold">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i}>{part.slice(1, -1)}</em>;
+    }
+    return part;
+  });
+}
+
 interface ChatMessageProps {
   message: Message;
   isStreaming?: boolean;
@@ -36,41 +50,52 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
           isUser ? "prose-invert" : "prose-invert prose-p:text-foreground prose-headings:text-foreground prose-li:text-foreground prose-strong:text-primary"
         )}>
           {message.content.split('\n').map((line, i) => {
+            // Headers with emoji support
             if (line.startsWith('### ')) {
-              return <h3 key={i} className="text-base font-semibold mt-4 mb-2">{line.slice(4)}</h3>;
+              return <h3 key={i} className="text-base font-semibold mt-5 mb-2 text-primary border-b border-primary/20 pb-1">{line.slice(4)}</h3>;
             }
             if (line.startsWith('## ')) {
-              return <h2 key={i} className="text-lg font-bold mt-4 mb-2">{line.slice(3)}</h2>;
+              return <h2 key={i} className="text-lg font-bold mt-5 mb-3 text-primary">{line.slice(3)}</h2>;
             }
             if (line.startsWith('# ')) {
-              return <h1 key={i} className="text-xl font-bold mt-4 mb-2">{line.slice(2)}</h1>;
+              return <h1 key={i} className="text-xl font-bold mt-5 mb-3 text-primary">{line.slice(2)}</h1>;
             }
+            
+            // Bullet points with better styling
             if (line.startsWith('- ') || line.startsWith('* ')) {
               return (
-                <div key={i} className="flex gap-2 my-1">
-                  <span className="text-primary">•</span>
-                  <span>{line.slice(2)}</span>
+                <div key={i} className="flex gap-3 my-2 pl-2">
+                  <span className="text-primary mt-1.5 text-xs">●</span>
+                  <span className="flex-1">{renderInlineFormatting(line.slice(2))}</span>
                 </div>
               );
             }
+            
+            // Numbered lists with better styling
             if (line.match(/^\d+\.\s/)) {
               const match = line.match(/^(\d+)\.\s(.*)$/);
               if (match) {
                 return (
-                  <div key={i} className="flex gap-2 my-1">
-                    <span className="text-primary font-medium">{match[1]}.</span>
-                    <span>{match[2]}</span>
+                  <div key={i} className="flex gap-3 my-2 pl-2">
+                    <span className="text-primary font-semibold min-w-[1.5rem]">{match[1]}.</span>
+                    <span className="flex-1">{renderInlineFormatting(match[2])}</span>
                   </div>
                 );
               }
             }
+            
+            // Bold text as sub-headers
             if (line.startsWith('**') && line.endsWith('**')) {
-              return <p key={i} className="font-semibold text-primary my-2">{line.slice(2, -2)}</p>;
+              return <p key={i} className="font-semibold text-primary mt-4 mb-2">{line.slice(2, -2)}</p>;
             }
+            
+            // Empty lines for spacing
             if (line.trim() === '') {
-              return <div key={i} className="h-2" />;
+              return <div key={i} className="h-3" />;
             }
-            return <p key={i} className="my-1">{line}</p>;
+            
+            // Regular paragraphs with inline formatting
+            return <p key={i} className="my-1.5 leading-relaxed">{renderInlineFormatting(line)}</p>;
           })}
           {isStreaming && (
             <span className="inline-block w-2 h-4 ml-1 bg-primary animate-pulse-subtle rounded-sm" />
